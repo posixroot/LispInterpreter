@@ -1,4 +1,5 @@
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -12,7 +13,7 @@ public class LispEvaluator {
         dlist = new HashMap<>();
     }
 
-    public Node eval(Node root, HashMap<String,String> alist) {
+    public Node eval(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
             return evalAtom(root, alist);
@@ -21,12 +22,13 @@ public class LispEvaluator {
         }
     }
 
-    private Node evalList(Node root, HashMap<String,String> alist) {
+    private Node evalList(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         Node funNode = root.left;
         Node n = null;
         if(funNode.lexToken!=null) {
             String funcName = funNode.lexToken.getLiteralValue();
+            System.out.println("DEBUG funcname : " + funcName);
             switch(funcName) {
                 case "QUOTE":
                     n=evalQuoteFunction(root.right, alist);
@@ -105,15 +107,120 @@ public class LispEvaluator {
         return n;
     }
 
-    private Node apply(String funcName, Node next, HashMap<String, String> alist) {
-        return null;
+    private Node apply(String funcName, Node next, HashMap<String, ArrayDeque<Node>> alist) {
+
+        if(!dlist.containsKey(funcName) || next.lexToken!=null) {
+            System.out.println("Apply error: Invalid function call arguments.");
+            System.exit(0);
+        }
+
+        Node actualList = next;
+        Node formalList = evalCarFunction(evalCdrFunction(dlist.get(funcName), alist), alist);
+
+        if(!checkParameterCount(actualList, formalList)) {
+            System.out.println("Apply error: " + funcName + " formal/acutal parameters mismatch.");
+            System.exit(0);
+        }
+
+        ArrayList<String> formalVarsBacktrack = new ArrayList<>();
+
+        Node actualIter = actualList, formalIter = formalList;
+        while(actualIter.lexToken==null && formalIter.lexToken==null) {
+            //check if there is only one variable on the left in case of formal parameter list.
+            Node formalVar = evalCarFunction(formalIter, alist);
+            Node actualVar = eval(evalCarFunction(actualIter, alist),alist);
+            if (formalVar.lexToken == null || actualVar.lexToken == null) {
+                System.out.println("Apply error: Invalid formal/actual parameter list.");
+                System.exit(0);
+            }
+            if (!checkValidName(formalVar) && evalInt(formalVar, alist) != null) {
+                System.out.println("Apply error: Invalid formal parameter name");
+                System.exit(0);
+            }
+            // need to check if variable name is in dlist(function-name) ? Nope....
+            String formalName = formalVar.lexToken.getLiteralValue();
+            formalVarsBacktrack.add(formalName);
+            if (!alist.containsKey(formalName)) {
+                alist.put(formalName, new ArrayDeque<>());
+            }
+            alist.get(formalName).addLast(actualVar);
+
+            actualIter = evalCdrFunction(actualIter, alist);
+            formalIter = evalCdrFunction(formalIter, alist);
+        }
+        System.out.println("Apply Debug: formals/actuals matched and added.");
+
+        Node funcBody = evalCarFunction(evalCdrFunction(evalCdrFunction(dlist.get(funcName), alist), alist), alist);
+
+        /*for(String s : formalVarsBacktrack) {
+            System.out.println("Alist debug: " + alist.get(s).getLast().lexToken.getLiteralValue());
+        }*/
+        Node ret = eval(funcBody, alist);
+
+        for(String s : formalVarsBacktrack) {
+            alist.get(s).removeLast();
+        }
+        return ret;
     }
 
-    private Node updateDlist(Node root, HashMap<String, String> alist) {
-        return null;
+    private boolean checkParameterCount(Node actualList, Node formalList) {
+        return true;
     }
 
-    private Node evalGreaterFunction(Node root, HashMap<String,String> alist) {
+    private Node updateDlist(Node root, HashMap<String, ArrayDeque<Node>> alist) {
+
+        Node func = evalCarFunction(root, alist);
+        if(func.lexToken==null || !checkValidName(func)) {
+            System.out.println("Update Dlist error: Expected an atom but got list instead.");
+            System.exit(0);
+        }
+
+        //check param and body argument counts.
+        if(evalCdrFunction(root,alist).lexToken!=null || evalCdrFunction(evalCdrFunction(root, alist), alist).lexToken!=null ||
+                evalCdrFunction(evalCdrFunction(evalCdrFunction(root, alist), alist), alist).lexToken==null ||
+                !evalCdrFunction(evalCdrFunction(evalCdrFunction(root, alist), alist), alist).lexToken.getLiteralValue().equals("NIL")
+                ) {
+            System.out.println("Update Dlist error: wrong parameter list and body of new function.");
+            System.exit(0);
+        }
+
+        //check if param names are duplicates.
+        ArrayList<String> formalVarsBacktrace = new ArrayList<>();
+        Node paramList = evalCarFunction(evalCdrFunction(root, alist), alist);
+        while(paramList.lexToken==null) {
+            Node formalVar = evalCarFunction(paramList, alist);
+            String formalName = formalVar.lexToken.getLiteralValue();
+            if(formalVarsBacktrace.contains(formalName) || !checkValidName(formalVar)) {
+                System.out.println("Defun error: Duplicate parameter name detected.");
+                System.exit(0);
+            }
+            formalVarsBacktrace.add(formalName);
+            paramList = evalCdrFunction(paramList, alist);
+        }
+        //check if paramlist is ending with NIL.
+        if(!paramList.lexToken.getLiteralValue().equals("NIL")) {
+            System.out.println("Defun error: List end discrepancy.");
+            System.exit(0);
+        }
+
+        dlist.put(func.lexToken.getLiteralValue(), root);
+        System.out.println(func.lexToken.getLiteralValue());
+        return root;
+        //return null;
+    }
+
+    private boolean checkValidName(Node func) {
+        switch(func.lexToken.getLiteralValue()) {
+            case "CAR":case "CDR": case "CONS":case "ATOM":case "EQ":case "NULL":case "INT":case "PLUS":
+            case "MINUS":case "TIMES":case "REMAINDER":case "QUOTIENT":case "LESS":case "GREATER":case "COND":
+            case "QUOTE":case "DEFUN":case "T":case "NIL":
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    private Node evalGreaterFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         Node result = evalMinusFunction(root, alist);
         Node ret = new Node(new LexToken(LexTokenID.ATOM, false));
         if(result.lexToken.getNumericValue()>0) {
@@ -128,7 +235,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalLessFunction(Node root, HashMap<String,String> alist) {
+    private Node evalLessFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         Node result = evalMinusFunction(root, alist);
         Node ret = new Node(new LexToken(LexTokenID.ATOM, false));
         if(result.lexToken.getNumericValue()<0) {
@@ -143,7 +250,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalRemainderFunction(Node root, HashMap<String,String> alist) {
+    private Node evalRemainderFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         if(root.lexToken!=null) {
             System.out.println("REMAINDER error: Expecting a list, but got atom instead.");
             System.exit(0);
@@ -169,7 +276,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalQuotientFunction(Node root, HashMap<String,String> alist) {
+    private Node evalQuotientFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         if(root.lexToken!=null) {
             System.out.println("QUOTIENT error: Expecting a list, but got atom instead.");
             System.exit(0);
@@ -193,7 +300,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalTimesFunction(Node root, HashMap<String,String> alist) {
+    private Node evalTimesFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         if(root.lexToken!=null) {
             System.out.println("TIMES error: Expecting a list, but got atom instead.");
             System.exit(0);
@@ -217,7 +324,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalMinusFunction(Node root, HashMap<String,String> alist) {
+    private Node evalMinusFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         if(root.lexToken!=null) {
             System.out.println("MINUS error: Expecting a list, but got atom instead.");
             System.exit(0);
@@ -241,7 +348,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalPlusFunction(Node root, HashMap<String,String> alist) {
+    private Node evalPlusFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         if(root.lexToken!=null) {
             System.out.println("PLUS error: Expecting a list, but got atom instead.");
             System.exit(0);
@@ -265,7 +372,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalConsFunction(Node root, HashMap<String,String> alist) {
+    private Node evalConsFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
             System.out.println("CONS error: Expecting a list, but got atom instead.");
@@ -276,10 +383,6 @@ public class LispEvaluator {
         Node rightTree = eval(evalCarFunction(evalCdrFunction(root, alist), alist), alist);
         Node nullTree = evalCdrFunction(evalCdrFunction(root, alist), alist);
 
-        /*if(rightTree.lexToken!=null) {
-            System.out.println("CONS error: Expecting a list, but got atom instead.");
-            System.exit(0);
-        }*/
         if(nullTree.lexToken==null || !nullTree.lexToken.getLiteralValue().equals("NIL")) {
             System.out.println("CONS error: More than 2 parameters detected.");
             System.exit(0);
@@ -298,7 +401,7 @@ public class LispEvaluator {
         node.isInnerList = (right.lexToken==null? right.isInnerList : right.lexToken.getLiteralValue().equals("NIL"))&&((left.lexToken==null)? left.isInnerList : true);
     }
 
-    private Node evalCdrFunction(Node root, HashMap<String,String> alist) {
+    private Node evalCdrFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
             System.out.println("CDR error: Expecting a list, but got atom instead.");
@@ -307,7 +410,7 @@ public class LispEvaluator {
         return root.right;
     }
 
-    private Node evalCarFunction(Node root, HashMap<String,String> alist) {
+    private Node evalCarFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
             System.out.println("CAR error: Expecting a list, but got atom instead.");
@@ -316,7 +419,7 @@ public class LispEvaluator {
         return root.left;
     }
 
-    private Node evalCondFunction(Node root, HashMap<String,String> alist) {
+    private Node evalCondFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
             System.out.println("COND error: Expecting a list, but got atom instead.");
@@ -362,7 +465,7 @@ public class LispEvaluator {
         }
     }
 
-    private Node evalQuoteFunction(Node root, HashMap<String,String> alist) {
+    private Node evalQuoteFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         if(root.right.lexToken==null || !root.right.lexToken.getLiteralValue().equals("NIL")) {
             System.out.println("QUOTE error: More than 1 parameter detected.");
             System.exit(0);
@@ -371,12 +474,11 @@ public class LispEvaluator {
         return evalCarFunction(root, alist);
     }
 
-    private Node evalAtomFunction(Node root, HashMap<String,String> alist) {
+    private Node evalAtomFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         Node ret = new Node(new LexToken(LexTokenID.ATOM, false));
         Node result = eval(evalCarFunction(root, alist), alist);
         if(evalCdrFunction(root, alist).lexToken!=null && evalCdrFunction(root, alist).lexToken.getLiteralValue().equals("NIL")) {
             if (result.left == null && result.right == null && result.lexToken != null) {
-                //result = evalAtom(result);
                 ret.lexToken.setLiteralValue("T");
                 ret.isList = false;
                 ret.isInnerList = false;
@@ -389,7 +491,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalIntFunction(Node root, HashMap<String,String> alist) {
+    private Node evalIntFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         Node ret = new Node(new LexToken(LexTokenID.ATOM, false));
 
         Node result = eval(evalCarFunction(root, alist), alist);
@@ -411,7 +513,6 @@ public class LispEvaluator {
             ret.isInnerList = true;
             return ret;
         }
-        //evalInt(root);
         int numval = -1;
         try {
             numval = Integer.parseInt(result.lexToken.getLiteralValue());
@@ -425,7 +526,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalNullFunction(Node root, HashMap<String,String> alist) {
+    private Node evalNullFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         //check if the argument is a list
         Node list = eval(evalCarFunction(root, alist), alist);
         Node ret = new Node(new LexToken(LexTokenID.ATOM, false));
@@ -445,36 +546,14 @@ public class LispEvaluator {
                 System.exit(0);
             }
         }
-        /*Node leftNode = list.left;
-        Node rightNode = list.right;
+        ret.lexToken.setLiteralValue("NIL");
+        ret.isList = true;
+        ret.isInnerList = true;
 
-        if(isSubtreeNull(leftNode) && isSubtreeNull(rightNode)) {
-            ret.lexToken.setLiteralValue("T");
-            ret.isList = false;
-            ret.isInnerList = false;
-        } else {*/
-            ret.lexToken.setLiteralValue("NIL");
-            ret.isList = true;
-            ret.isInnerList = true;
-        //}
         return ret;
     }
 
-    /*private boolean isSubtreeNull(Node node, HashMap<String,String> alist) {
-
-        if(node.lexToken!=null) {
-            if(node.lexToken.getLiteralValue().equals("NIL")) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            //return isSubtreeNull(node.left) && isSubtreeNull(node.right);
-            return false;
-        }
-    }*/
-
-    private Node evalEqFunction(Node root, HashMap<String,String> alist) {
+    private Node evalEqFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         //check if it is a list and not an atom
         if(root.left==null || root.right==null || root.lexToken!=null) {
             System.out.println("EQ error: Expecting a list, but got an atom instead.");
@@ -525,7 +604,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private Node evalInt(Node root, HashMap<String,String> alist) {
+    private Node evalInt(Node root, HashMap<String,ArrayDeque<Node>> alist) {
         //check that there is only one element
         if(root.lexToken==null) {
             System.out.println("Illegal List - Expected an atom!");
@@ -544,7 +623,7 @@ public class LispEvaluator {
         return root;
     }
 
-    private Node evalAtom(Node root, HashMap<String,String> alist) {
+    private Node evalAtom(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken==null) {
             System.out.println("Expecting an atom, but got a list instead.");
@@ -560,13 +639,29 @@ public class LispEvaluator {
         } else if(root.lexToken.isNumericAtom){
             return evalInt(root, alist);
         } else {
-
             //implement bound and getval
-
+            if(bound(s, alist)) {
+                Node ret = getVal(s, alist);
+                if(ret.lexToken.isNumericAtom) {
+                    return evalInt(ret, alist);
+                }
+                return ret;
+            }
             System.out.println("Unidentified Atom!");
             System.exit(0);
             return null;
         }
 
+    }
+
+    private Node getVal(String s, HashMap<String, ArrayDeque<Node>> alist) {
+        return alist.get(s).getLast();
+    }
+
+    private boolean bound(String s, HashMap<String, ArrayDeque<Node>> alist) {
+        if(alist.containsKey(s) && !alist.get(s).isEmpty()) {
+            return true;
+        }
+        return false;
     }
 }
