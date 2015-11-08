@@ -6,6 +6,12 @@ import java.util.HashMap;
  */
 public class LispEvaluator {
 
+    HashMap<String, Node> dlist;
+
+    public LispEvaluator() {
+        dlist = new HashMap<>();
+    }
+
     public Node eval(Node root, HashMap<String,String> alist) {
 
         if(root.lexToken!=null) {
@@ -79,12 +85,14 @@ public class LispEvaluator {
                     n=evalGreaterFunction(root.right, alist);
                     break;
                 case "DEFUN":
-                    //n=updateDlist(root.right, alist);
+                    n=updateDlist(root.right, alist);
                     break;
                 default:
-                    //apply(funcName, root.right, alist);
-                    System.out.println("Invalid function name!");
-                    System.exit(0);
+                    n = apply(funcName, root.right, alist);
+                    if(n==null) {
+                        System.out.println("Invalid function name!");
+                        System.exit(0);
+                    }
                     break;
             }
         } else {
@@ -95,6 +103,14 @@ public class LispEvaluator {
             setInnerList(n);
         }
         return n;
+    }
+
+    private Node apply(String funcName, Node next, HashMap<String, String> alist) {
+        return null;
+    }
+
+    private Node updateDlist(Node root, HashMap<String, String> alist) {
+        return null;
     }
 
     private Node evalGreaterFunction(Node root, HashMap<String,String> alist) {
@@ -444,7 +460,7 @@ public class LispEvaluator {
         return ret;
     }
 
-    private boolean isSubtreeNull(Node node, HashMap<String,String> alist) {
+    /*private boolean isSubtreeNull(Node node, HashMap<String,String> alist) {
 
         if(node.lexToken!=null) {
             if(node.lexToken.getLiteralValue().equals("NIL")) {
@@ -456,7 +472,7 @@ public class LispEvaluator {
             //return isSubtreeNull(node.left) && isSubtreeNull(node.right);
             return false;
         }
-    }
+    }*/
 
     private Node evalEqFunction(Node root, HashMap<String,String> alist) {
         //check if it is a list and not an atom
