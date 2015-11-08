@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Created by kiran on 9/26/15.
@@ -23,7 +24,7 @@ public class Parser {
         //treePrinter.printExp(ret);
 
         //System.out.println("DEBUG eval print follows: ");
-        treePrinter.printExp(lispEvaluator.eval(ret));
+        treePrinter.printExp(lispEvaluator.eval(ret, new HashMap<String,String>()));
 
         while(lex.getPeek()==' ' || lex.getPeek()=='\n' || lex.getPeek()=='\t' || lex.getPeek()=='\0')
             lex.peekAhead();
