@@ -117,7 +117,7 @@ public class LispEvaluator {
         Node actualList = next;
         Node formalList = evalCarFunction(evalCdrFunction(dlist.get(funcName), alist), alist);
 
-        if(!checkParameterCount(actualList, formalList)) {
+        if(!checkParameterCount(actualList, formalList, alist)) {
             System.out.println("Apply error: " + funcName + " formal/acutal parameters mismatch.");
             System.exit(0);
         }
@@ -129,7 +129,9 @@ public class LispEvaluator {
             //check if there is only one variable on the left in case of formal parameter list.
             Node formalVar = evalCarFunction(formalIter, alist);
             Node actualVar = eval(evalCarFunction(actualIter, alist),alist);
-            if (formalVar.lexToken == null || actualVar.lexToken == null) {
+            if (formalVar.lexToken == null
+                    //|| actualVar.lexToken == null
+                    ) {
                 System.out.println("Apply error: Invalid formal/actual parameter list.");
                 System.exit(0);
             }
@@ -163,8 +165,31 @@ public class LispEvaluator {
         return ret;
     }
 
-    private boolean checkParameterCount(Node actualList, Node formalList) {
-        return true;
+    private boolean checkParameterCount(Node actualList, Node formalList, HashMap<String, ArrayDeque<Node>> alist) {
+        Node actualIter = actualList;
+        Node formalIter = formalList;
+        int actualCount=0, formalCount=0;
+        while(actualIter.lexToken==null && formalIter.lexToken==null) {
+            actualCount++;
+            formalCount++;
+            actualIter = evalCdrFunction(actualIter, alist);
+            formalIter = evalCdrFunction(formalIter, alist);
+        }
+        while(actualIter.lexToken==null) {
+            if(evalCarFunction(actualIter, alist).lexToken!=null &&
+                    !evalCarFunction(actualIter, alist).lexToken.getLiteralValue().equals("NIL")) {
+                actualCount++;
+            }
+            actualIter = evalCdrFunction(actualIter, alist);
+        }
+        while(formalIter.lexToken==null) {
+            formalCount++;
+            formalIter = evalCdrFunction(formalIter, alist);
+        }
+        if(actualCount==formalCount)
+            return true;
+        else
+            return false;
     }
 
     private Node updateDlist(Node root, HashMap<String, ArrayDeque<Node>> alist) {
@@ -579,6 +604,8 @@ public class LispEvaluator {
             System.exit(0);
         }
         if(lop.lexToken.isNumericAtom) {
+            lop = evalInt(lop, alist);
+            rop = evalInt(rop, alist);
             if (lop.lexToken.getNumericValue() == rop.lexToken.getNumericValue()) {
                 ret.lexToken.setLiteralValue("T");
                 ret.isList = false;
@@ -642,7 +669,7 @@ public class LispEvaluator {
             //implement bound and getval
             if(bound(s, alist)) {
                 Node ret = getVal(s, alist);
-                if(ret.lexToken.isNumericAtom) {
+                if(ret.lexToken!=null && ret.lexToken.isNumericAtom) {
                     return evalInt(ret, alist);
                 }
                 return ret;

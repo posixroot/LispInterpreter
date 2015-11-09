@@ -1,9 +1,22 @@
 (DEFUN. ( DIFF . ( (X.(Y.NIL)) . ( () .NIL))))
 (COND. ( ( (EQ.(X.(Y.NIL))).(NIL.NIL)) . ( (T.(T.NIL)) .NIL)))
 
+(DEFUN. (MEM.( (X.(LIST.NIL)) .( (COND.(  ((NULL.(LIST.NIL)).(NIL.NIL))  . ( ( T. ( (COND.(  ( (EQ.(X.((CAR.(LIST.NIL)).NIL))) .(T.NIL))  . ( ( T . (  (MEM. (X. ((CDR.(LIST.NIL)).NIL) ) ) .NIL) ) .NIL))) .NIL)  ) .NIL)))
+ .NIL))))
+(COND.(  ((NULL.(LIST.NIL)).(NIL.NIL))  . ( ( T. ( (COND.(  ( (EQ.(X.((CAR.(LIST.NIL)).NIL))) .(T.NIL))  . ( ( T . (  (MEM. (X. ((CDR.(LIST.NIL)).NIL) ) ) .NIL) ) .NIL))) .NIL)  ) .NIL)))
+(COND.(  ( (EQ.(X.((CAR.(LIST.NIL)).NIL))) .(T.NIL))  . ( ( T . (  (MEM. (X. ((CDR.(LIST.NIL)).NIL) ) ) .NIL) ) .NIL)))
+(EQ.(X.((CAR.(LIST.NIL)).NIL)))
+(MEM. (X. ((CDR.(LIST.NIL)).NIL) ) )
 
-(DEFUN. (FIVE . ( NIL . ( 5 .NIL))))
+
 (DEFUN. ( DIFF . ( (X.(Y.NIL)) . ( (COND. ( ( (EQ.(X.(Y.NIL))).(NIL.NIL)) . ( (T.(T.NIL)) .NIL))) .NIL))))
 (DIFF.(5.(6.NIL)))
 (DIFF.(5.(5.NIL)))
+
+(DEFUN. (FIVE . ( NIL . ( 5 .NIL))))
 (FIVE.(NIL.NIL))
+
+(DEFUN. (MEM.( (X.(LIST.NIL)) .( (COND.(  ((NULL.(LIST.NIL)).(NIL.NIL))  . ( ( T. ( (COND.(  ( (EQ.(X.((CAR.(LIST.NIL)).NIL))) .(T.NIL))  . ( ( T . (  (MEM. (X. ((CDR.(LIST.NIL)).NIL) ) ) .NIL) ) .NIL))) .NIL)  ) .NIL)))
+ .NIL))))
+(MEM.(5.((QUOTE.((3.(4.(5.(6.NIL)))).NIL)).NIL)))
+(MEM.(10.((QUOTE.((3.(4.(5.(6.NIL)))).NIL)).NIL)))
