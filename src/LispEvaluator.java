@@ -490,8 +490,9 @@ public class LispEvaluator {
         }
     }
 
+
     private Node evalQuoteFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
-        if(root.right.lexToken==null || !root.right.lexToken.getLiteralValue().equals("NIL")) {
+        if(root.lexToken!=null || root.right.lexToken==null || !root.right.lexToken.getLiteralValue().equals("NIL")) {
             System.out.println("QUOTE error: More than 1 parameter detected.");
             System.exit(0);
         }
@@ -692,3 +693,4 @@ public class LispEvaluator {
         return false;
     }
 }
+
