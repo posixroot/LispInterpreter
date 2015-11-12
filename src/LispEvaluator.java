@@ -109,7 +109,9 @@ public class LispEvaluator {
 
     private Node apply(String funcName, Node next, HashMap<String, ArrayDeque<Node>> alist) {
 
-        if(!dlist.containsKey(funcName) || next.lexToken!=null) {
+        if(!dlist.containsKey(funcName)
+                //|| next.lexToken!=null
+                ) {
             System.out.println("Apply error: Invalid function call arguments.");
             System.exit(0);
         }
@@ -175,21 +177,31 @@ public class LispEvaluator {
             actualIter = evalCdrFunction(actualIter, alist);
             formalIter = evalCdrFunction(formalIter, alist);
         }
-        while(actualIter.lexToken==null) {
-            if(evalCarFunction(actualIter, alist).lexToken!=null &&
-                    !evalCarFunction(actualIter, alist).lexToken.getLiteralValue().equals("NIL")) {
-                actualCount++;
+        if(actualIter.lexToken!=null && formalIter.lexToken!=null) {
+            if(!actualIter.lexToken.getLiteralValue().equals("NIL") ||
+                    !formalIter.lexToken.getLiteralValue().equals("NIL")) {
+                return false;
             }
-            actualIter = evalCdrFunction(actualIter, alist);
+        } else {
+            while(actualIter.lexToken==null) {
+                /*if(evalCarFunction(actualIter, alist).lexToken!=null
+                        //&& !evalCarFunction(actualIter, alist).lexToken.getLiteralValue().equals("NIL")
+                        ) {*/
+                    actualCount++;
+                //}
+                actualIter = evalCdrFunction(actualIter, alist);
+            }
+            if(!actualIter.lexToken.getLiteralValue().equals("NIL")) {
+                System.out.println("Apply error: Invalid end of actual Parameter List.");
+                System.exit(0);
+            }
+            while(formalIter.lexToken==null) {
+                formalCount++;
+                formalIter = evalCdrFunction(formalIter, alist);
+            }
         }
-        while(formalIter.lexToken==null) {
-            formalCount++;
-            formalIter = evalCdrFunction(formalIter, alist);
-        }
-        if(actualCount==formalCount)
-            return true;
-        else
-            return false;
+        System.out.println("Debug paramCount: actual: " + actualCount + " formalCount: " + formalCount);
+        return actualCount==formalCount;
     }
 
     private Node updateDlist(Node root, HashMap<String, ArrayDeque<Node>> alist) {
@@ -216,7 +228,7 @@ public class LispEvaluator {
             Node formalVar = evalCarFunction(paramList, alist);
             String formalName = formalVar.lexToken.getLiteralValue();
             if(formalVarsBacktrace.contains(formalName) || !checkValidName(formalVar)) {
-                System.out.println("Defun error: Duplicate parameter name detected.");
+                System.out.println("Defun error: Duplicate/invalid parameter name detected.");
                 System.exit(0);
             }
             formalVarsBacktrace.add(formalName);
@@ -429,8 +441,11 @@ public class LispEvaluator {
     private Node evalCdrFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
-            System.out.println("CDR error: Expecting a list, but got atom instead.");
-            System.exit(0);
+            root = eval(root, alist);
+            if(root.lexToken!=null) {
+                System.out.println("CDR error: Expecting a list, but got atom instead.");
+                System.exit(0);
+            }
         }
         return root.right;
     }
@@ -438,8 +453,11 @@ public class LispEvaluator {
     private Node evalCarFunction(Node root, HashMap<String,ArrayDeque<Node>> alist) {
 
         if(root.lexToken!=null) {
-            System.out.println("CAR error: Expecting a list, but got atom instead.");
-            System.exit(0);
+            root = eval(root, alist);
+            if(root.lexToken!=null) {
+                System.out.println("CAR error: Expecting a list, but got atom instead.");
+                System.exit(0);
+            }
         }
         return root.left;
     }
@@ -562,6 +580,10 @@ public class LispEvaluator {
         }
 
         if(list.lexToken!=null) {
+            list = eval(list, alist);
+        }
+
+        if(list.lexToken!=null) {
             if(list.lexToken.getLiteralValue().equals("NIL")) {
                 ret.lexToken.setLiteralValue("T");
                 ret.isList = false;
@@ -588,7 +610,7 @@ public class LispEvaluator {
 
         Node lop = eval(evalCarFunction(root, alist), alist);
         Node rop = eval(evalCarFunction(evalCdrFunction(root, alist), alist), alist);
-        Node nullop = evalCdrFunction(evalCdrFunction(root, alist), alist);
+        Node nullop = eval (evalCdrFunction(evalCdrFunction(root, alist), alist) , alist);
 
         if(nullop.lexToken==null || !nullop.lexToken.getLiteralValue().equals("NIL")) {
             System.out.println("EQ error: Too many parameters.");
