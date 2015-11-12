@@ -47,9 +47,21 @@
  .NIL))))
 (MEM.(5.((QUOTE.((3.(4.(5.(6.NIL)))).NIL)).NIL)))
 (MEM.(10.((QUOTE.((3.(4.(5.(6.NIL)))).NIL)).NIL)))
+(MEM.( T . ( (QUOTE.((T.NIL).NIL)).NIL)))
+(MEM.(5.(NIL.NIL)))
 
 (DEFUN. (UNION. ( (S1.(S2.NIL)) . ( (COND. ( ((NULL.(S1.NIL)).(S2.NIL)) .( ((NULL.(S2.NIL)).(S1.NIL)) .( (T.( (COND. ( ((MEM.( (CAR.(S1.NIL)) .(  S2   .NIL)) ) . ( (UNION. ( (CDR.(S1.NIL)) .( S2 .NIL)) ) .NIL) ) . ( (T.( (CONS. ( (CAR.(S1.NIL)) .( (UNION. ( (CDR.(S1.NIL)) .( S2 .NIL)) ) .NIL))) .NIL)) .NIL)) ) .NIL)) . NIL))) ) .NIL) )))
 (UNION.( (QUOTE.( (1.(2.(3.NIL))) .NIL))  .  (  (QUOTE.( (4.(5.(6.NIL))) .NIL))  .NIL)))
 (UNION.( (QUOTE.( (4.(5.(6.NIL))) .NIL))  .  (  (QUOTE.( (4.(5.(6.NIL))) .NIL)) .NIL)))
 (UNION.( (QUOTE.( (4.(5.(7.NIL))) .NIL))  . ( (QUOTE.( (4.(5.(6.NIL))) .NIL)) .NIL)))
 (UNION.( (QUOTE.( (4.(5.(7.NIL))) .NIL))  . ( (QUOTE.( (10.(5.(6.NIL))) .NIL)) .NIL)))
+
+(DEFUN. (ADD5. ((X.NIL). ((PLUS.(X.(5.NIL))) .NIL))))
+(DEFUN. (RETURNSAME.((X.NIL).( (MINUS.( (ADD5.(X.NIL)) . ( (FIVE.NIL) .NIL) )) .NIL))))
+(RETURNSAME.(6.NIL))
+
+(DEFUN . (F.((X.NIL).((PLUS.(X.(Y.NIL))).NIL))))
+(DEFUN . (G.((Y.NIL).( (F.(10.NIL)) .NIL))) )
+(DEFUN . (H.((Y.NIL).( (F.(20.NIL)) .NIL))) )
+(G.(1.NIL))
+(H.(1.NIL))
