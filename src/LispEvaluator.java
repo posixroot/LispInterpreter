@@ -28,7 +28,7 @@ public class LispEvaluator {
         Node n = null;
         if(funNode.lexToken!=null) {
             String funcName = funNode.lexToken.getLiteralValue();
-            System.out.println("DEBUG funcname : " + funcName);
+            //System.out.println("DEBUG funcname : " + funcName);
             switch(funcName) {
                 case "QUOTE":
                     n=evalQuoteFunction(root.right, alist);
@@ -152,13 +152,10 @@ public class LispEvaluator {
             actualIter = evalCdrFunction(actualIter, alist);
             formalIter = evalCdrFunction(formalIter, alist);
         }
-        System.out.println("Apply Debug: formals/actuals matched and added.");
+        //System.out.println("Apply Debug: formals/actuals matched and added.");
 
         Node funcBody = evalCarFunction(evalCdrFunction(evalCdrFunction(dlist.get(funcName), alist), alist), alist);
 
-        /*for(String s : formalVarsBacktrack) {
-            System.out.println("Alist debug: " + alist.get(s).getLast().lexToken.getLiteralValue());
-        }*/
         Node ret = eval(funcBody, alist);
 
         for(String s : formalVarsBacktrack) {
@@ -200,7 +197,7 @@ public class LispEvaluator {
                 formalIter = evalCdrFunction(formalIter, alist);
             }
         }
-        System.out.println("Debug paramCount: actual: " + actualCount + " formalCount: " + formalCount);
+        //System.out.println("Debug paramCount: actual: " + actualCount + " formalCount: " + formalCount);
         return actualCount==formalCount;
     }
 
@@ -242,8 +239,8 @@ public class LispEvaluator {
 
         dlist.put(func.lexToken.getLiteralValue(), root);
         System.out.println(func.lexToken.getLiteralValue());
-        return root;
-        //return null;
+        //return root;
+        return null;
     }
 
     private boolean checkValidName(Node func) {
