@@ -1,7 +1,7 @@
 Kiran Maddipati
 maddipati.5@osu.edu
 
-CSE 6431 - Project Part2
+CSE 6431 - Project Part3
 
 1. The project contains 8 java files:
 	a. Interpreter.java -  Contains the main function. This class creates the Parser object and calls ParseStart() function.
@@ -11,7 +11,7 @@ CSE 6431 - Project Part2
 	e. LexToken.java - This class defines the Token object that is returned by the getNextToken() function.
 	f. LexTokenID.java - This class defines the enum for the terminal symbols.
 	g. TreePrinter.java - This class defines the functions that are used to print the parse tree in either Dot or List notation.
-	h. ListEvaluator.java - This class defines the eval function. Also, it contains implementations of all other lisp functions.
+	h. ListEvaluator.java - This class defines the eval function. Also, it contains implementations of all other lisp functions, including apply function.
 
 2. Useful Funtion References:
 	getNextToken() - Implemented in LexAnalyzer.java
@@ -20,12 +20,13 @@ CSE 6431 - Project Part2
 	printList() - Implemented in TreePrinter.java. This function prints the list notation of the S-exp.
 	printNode() - Implemented in TreePrinter.java. This function prints the dot notation of teh S-exp.
 	eval() - Implemented in LispEvaluator.java. This function call other helper eval functions defined in the same class.
+	apply() - Implemented in LispEvaluator.java. This function calls other helper eval functions defined in the same class.
 
-3. Makefile is enclosed. Simply run make to build the project.
+3. Makefile is enclosed. Simply run "make" to build the project. And, "make clean" to remove executables.
 
 4. Runfile is enclosed.
 
-5. Valid test input can be found in file: valid-test.
+5. Valid test input can be found in file: valid-test-defun.
 
-6. Invalid test input can be found in file: invalid-test
+6. Invalid test input can be found in file: invalid-test-defun.
 
