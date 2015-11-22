@@ -24,6 +24,11 @@ public class Parser {
 
         Node ret = parseSexp();
 
+        //type-checking code
+        MyType nodeType = typeChecker.getType(ret);
+        ret.type = nodeType;
+        System.out.println("Debug ret type: " + ret.type);
+
         //For non-eval printing
         treePrinter.printExp(ret);
 
@@ -73,13 +78,9 @@ public class Parser {
                 System.exit(0);
             }
 
-            //type-checking code
-            MyType nodeType = typeChecker.getType(left, right);
-
             Node node = new Node(left, right);
             node.isList = right.isList;
             node.isInnerList = (right.lexToken==null? right.isInnerList : right.lexToken.getLiteralValue().equals("NIL"))&&(left.lexToken==null? left.isInnerList : true);
-            node.type = nodeType;
             return node;
         } else {
             System.out.println("ERROR: Token ATOM or Token OPEN_PAR expected, but got " + lexToken.tokenID + " instead!");

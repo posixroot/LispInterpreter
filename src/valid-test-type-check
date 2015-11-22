@@ -1,0 +1,5 @@
+(COND.(( T. (4.NIL) ).NIL))
+(COND.(( T. ((4.(5.NIL)).NIL) ).NIL))
+(INT.(4.NIL))
+(PLUS.(4.(5.NIL)))
+(COND.(( T. ((4.(T.NIL)).NIL) ).NIL))
