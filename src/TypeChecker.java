@@ -5,7 +5,7 @@ public class TypeChecker {
 
     public MyType getType(Node node) {
 
-        if(!node.isInnerList) {
+        if(!node.isInnerNode()) {
             return identifyType(node);
         }
 
@@ -83,7 +83,11 @@ public class TypeChecker {
             if(getType(iter.left.left)!=MyType.BOOL) {
                 typeError("Invalid COND Truth Check Type");
             }
-            retType = getType(iter.left.right.left);
+            if(iter.left.right.right.isInnerNode()) {
+                retType = getType(iter.left.right);
+            } else {
+                retType = getType(iter.left.right.left);
+            }
             if(prevType!=null) {
                 if(prevType!=retType) {
                     typeError("Invalid COND Return Type");
@@ -118,22 +122,32 @@ public class TypeChecker {
     }
 
     private MyType getIntType(Node node) {
-        MyType argType = getType(node.left);
+        MyType argType = null;
+        if(node.right.isInnerNode()) {
+            argType = getType(node);
+        } else {
+            argType = getType(node.left);
+        }
         if(argType!=null) {
             return MyType.BOOL;
         }
         typeError("Invalid INT Type");
-        return null;
+        return argType;
     }
 
     private MyType getNullType(Node node) {
-        MyType argType = getType(node.left);
+        MyType argType = null;
+        if(node.right.isInnerNode()) {
+            argType = getType(node);
+        } else {
+            argType = getType(node.left);
+        }
 
         if(argType==MyType.LIST) {
             return MyType.BOOL;
         }
         typeError("Invalid NULL Type");
-        return null;
+        return argType;
     }
 
     private MyType getEqType(Node node) {
@@ -148,13 +162,18 @@ public class TypeChecker {
     }
 
     private MyType getAtomType(Node node) {
-        MyType argType = getType(node.left);
+        MyType argType = null;
+        if(node.right.isInnerNode()) {
+            argType = getType(node);
+        } else {
+            argType = getType(node.left);
+        }
 
         if(argType!=null) {
             return MyType.BOOL;
         }
         typeError("Invalid ATOM Type");
-        return null;
+        return argType;
     }
 
     private MyType getConsType(Node node) {
@@ -169,21 +188,31 @@ public class TypeChecker {
     }
 
     private MyType getCdrType(Node node) {
-        MyType argType = getType(node.left);
+        MyType argType = null;
+        if(node.right.isInnerNode()) {
+            argType = getType(node);
+        } else {
+            argType = getType(node.left);
+        }
         if(argType==MyType.LIST) {
             return MyType.LIST;
         }
         typeError("Invalid CDR Type");
-        return null;
+        return argType;
     }
 
     private MyType getCarType(Node node) {
-        MyType argType = getType(node.left);
+        MyType argType = null;
+        if(node.right.isInnerNode()) {
+            argType = getType(node);
+        } else {
+            argType = getType(node.left);
+        }
         if(argType==MyType.LIST) {
             return MyType.NAT;
         }
         typeError("Invalid CAR Type");
-        return null;
+        return argType;
     }
 
     private boolean isFunction(Node node) {
