@@ -11,3 +11,4 @@
 (CONS.( (CAR.(4.NIL)) .( ((PLUS.(5.(5.NIL))).NIL) .NIL)))
 (CONS.( (CAR.(4.(5.NIL))) .( (CDR.(5.NIL)) .NIL)))
 (NULL.(2.NIL))
+(ATOM.(5.(T.NIL)))
