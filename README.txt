@@ -1,9 +1,9 @@
 Kiran Maddipati
 maddipati.5@osu.edu
 
-CSE 6431 - Project Part3
+CSE 6431 - Project Part4
 
-1. The project contains 8 java files:
+1. The project contains 10 java files:
 	a. Interpreter.java -  Contains the main function. This class creates the Parser object and calls ParseStart() function.
 	b. LexAnalyzer.java - This class reads the input file byte by byte and returns a LexToken. This class implements the getNextToken() function.
 	c. Parser.java - This class parses the S-exp by getting tokens from LexAnalyzer class ( by calling getNextToken() ) and also appropiately prints parse tree.
@@ -12,6 +12,8 @@ CSE 6431 - Project Part3
 	f. LexTokenID.java - This class defines the enum for the terminal symbols.
 	g. TreePrinter.java - This class defines the functions that are used to print the parse tree in either Dot or List notation.
 	h. ListEvaluator.java - This class defines the eval function. Also, it contains implementations of all other lisp functions, including apply function.
+	i. TypeChecker.java - This class defines the static type-checking functionality of this language.
+	j. MyType.java - This class defines the enum for the static type-checking types.
 
 2. Useful Funtion References:
 	getNextToken() - Implemented in LexAnalyzer.java
@@ -21,12 +23,13 @@ CSE 6431 - Project Part3
 	printNode() - Implemented in TreePrinter.java. This function prints the dot notation of teh S-exp.
 	eval() - Implemented in LispEvaluator.java. This function call other helper eval functions defined in the same class.
 	apply() - Implemented in LispEvaluator.java. This function calls other helper eval functions defined in the same class.
+	getType() - Type checking method implemented in TypeChecker.java. This function calls other helper functions defined in the same class.
 
 3. Makefile is enclosed. Simply run "make" to build the project. And, "make clean" to remove executables.
 
 4. Runfile is enclosed.
 
-5. Valid test input can be found in file: valid-test-defun.
+5. Valid test input can be found in file: valid-test-type-check.
 
-6. Invalid test input can be found in file: invalid-test-defun.
+6. Invalid test input can be found in file: invalid-test-type-check.
 

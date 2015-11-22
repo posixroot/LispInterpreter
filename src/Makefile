@@ -9,7 +9,7 @@ COMPILE = $(JAVAC) $(JAVAFLAGS)
 .java.class:
 	$(COMPILE) $*.java
 
-CLASS_FILES = Interpreter.java LexAnalyzer.java Parser.java Node.java LexToken.java LexTokenID.java TreePrinter.java LispEvaluator.java
+CLASS_FILES = Interpreter.java LexAnalyzer.java Parser.java Node.java LexToken.java LexTokenID.java TreePrinter.java LispEvaluator.java TypeChecker.java MyType.java
 
 default: classes
 
