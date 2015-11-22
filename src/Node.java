@@ -8,6 +8,9 @@ public class Node {
     Node right;
     LexToken lexToken;
 
+    //needed for type-checking
+    MyType type;
+
     public Node(LexToken lexToken) {
         this.lexToken = lexToken;
         left = null;
@@ -18,5 +21,10 @@ public class Node {
         this.left = left;
         this.right = right;
         lexToken = null;
+    }
+
+    //needed for type-checking
+    public boolean isInnerNode() {
+        return lexToken == null;
     }
 }

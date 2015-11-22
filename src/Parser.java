@@ -11,21 +11,24 @@ public class Parser {
     LexAnalyzer lex;
     TreePrinter treePrinter;
     LispEvaluator lispEvaluator;
+    TypeChecker typeChecker;
 
     public Parser(BufferedReader br) {
         lex = new LexAnalyzer(br);
         treePrinter = new TreePrinter();
         lispEvaluator = new LispEvaluator();
+        typeChecker = new TypeChecker();
     }
 
     public void parseStart() {
 
         Node ret = parseSexp();
 
-        //treePrinter.printExp(ret);
+        //For non-eval printing
+        treePrinter.printExp(ret);
 
-        //System.out.println("DEBUG eval print follows: ");
-        treePrinter.printExp(lispEvaluator.eval(ret, new HashMap<String,ArrayDeque<Node>>()));
+        //For eval printing
+        //treePrinter.printExp(lispEvaluator.eval(ret, new HashMap<String,ArrayDeque<Node>>()));
 
         while(lex.getPeek()==' ' || lex.getPeek()=='\n' || lex.getPeek()=='\t' || lex.getPeek()=='\0')
             lex.peekAhead();
@@ -70,9 +73,13 @@ public class Parser {
                 System.exit(0);
             }
 
+            //type-checking code
+            MyType nodeType = typeChecker.getType(left, right);
+
             Node node = new Node(left, right);
             node.isList = right.isList;
             node.isInnerList = (right.lexToken==null? right.isInnerList : right.lexToken.getLiteralValue().equals("NIL"))&&(left.lexToken==null? left.isInnerList : true);
+            node.type = nodeType;
             return node;
         } else {
             System.out.println("ERROR: Token ATOM or Token OPEN_PAR expected, but got " + lexToken.tokenID + " instead!");
