@@ -25,7 +25,13 @@ public class Parser {
         Node ret = parseSexp();
 
         //type-checking code
-        MyType nodeType = typeChecker.getType(ret);
+        MyType nodeType = null;
+        try{
+            typeChecker.getType(ret);
+        }catch (NullPointerException e) {
+            System.out.println("Type Error: Invalid Number of arguments.");
+            System.exit(0);
+        }
         ret.type = nodeType;
         System.out.println("Debug ret type: " + ret.type);
 
