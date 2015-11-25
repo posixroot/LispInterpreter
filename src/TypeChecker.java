@@ -17,7 +17,7 @@ public class TypeChecker {
             return getFunctionReturnType(left.lexToken.getLiteralValue(), right);
         }
 
-        if(right.isInnerNode()) {
+        /*if(right.isInnerNode()) {
             rightType = getType(right);
         } else {
             rightType = identifyType(right);
@@ -31,7 +31,7 @@ public class TypeChecker {
 
         if(leftType==MyType.NAT && rightType==MyType.LIST) {
             return MyType.LIST;
-        }
+        }*/
 
         typeError("Invalid list types");
         return null;
@@ -83,11 +83,11 @@ public class TypeChecker {
             if(getType(iter.left.left)!=MyType.BOOL) {
                 typeError("Invalid COND Truth Check Type");
             }
-            if(iter.left.right.right.isInnerNode()) {
+            /*if(iter.left.right.right.isInnerNode()) {
                 retType = getType(iter.left.right);
-            } else {
+            } else {*/
                 retType = getType(iter.left.right.left);
-            }
+            //}
             if(prevType!=null) {
                 if(prevType!=retType) {
                     typeError("Invalid COND Return Type");
@@ -123,11 +123,11 @@ public class TypeChecker {
 
     private MyType getIntType(Node node) {
         MyType argType = null;
-        if(node.right.isInnerNode()) {
+        /*if(node.right.isInnerNode()) {
             argType = getType(node);
-        } else {
+        } else {*/
             argType = getType(node.left);
-        }
+        //}
         if(argType!=null) {
             return MyType.BOOL;
         }
@@ -137,11 +137,11 @@ public class TypeChecker {
 
     private MyType getNullType(Node node) {
         MyType argType = null;
-        if(node.right.isInnerNode()) {
+       /*if(node.right.isInnerNode()) {
             argType = getType(node);
-        } else {
+        } else {*/
             argType = getType(node.left);
-        }
+        //}
 
         if(argType==MyType.LIST) {
             return MyType.BOOL;
@@ -163,11 +163,11 @@ public class TypeChecker {
 
     private MyType getAtomType(Node node) {
         MyType argType = null;
-        if(node.right.isInnerNode()) {
+        /*if(node.right.isInnerNode()) {
             argType = getType(node);
-        } else {
+        } else {*/
             argType = getType(node.left);
-        }
+        //}
 
         if(argType!=null) {
             return MyType.BOOL;
@@ -189,11 +189,11 @@ public class TypeChecker {
 
     private MyType getCdrType(Node node) {
         MyType argType = null;
-        if(node.right.isInnerNode()) {
+        /*if(node.right.isInnerNode()) {
             argType = getType(node);
-        } else {
+        } else {*/
             argType = getType(node.left);
-        }
+        //}
         if(argType==MyType.LIST) {
             return MyType.LIST;
         }
@@ -203,11 +203,11 @@ public class TypeChecker {
 
     private MyType getCarType(Node node) {
         MyType argType = null;
-        if(node.right.isInnerNode()) {
+        /*if(node.right.isInnerNode()) {
             argType = getType(node);
-        } else {
+        } else {*/
             argType = getType(node.left);
-        }
+        //}
         if(argType==MyType.LIST) {
             return MyType.NAT;
         }

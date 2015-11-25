@@ -27,13 +27,13 @@ public class Parser {
         //type-checking code
         MyType nodeType = null;
         try{
-            typeChecker.getType(ret);
+            nodeType = typeChecker.getType(ret);
         }catch (NullPointerException e) {
             System.out.println("Type Error: Invalid Number of arguments.");
             System.exit(0);
         }
         ret.type = nodeType;
-        System.out.println("Debug ret type: " + ret.type);
+        System.out.println("Debug ret type: " + nodeType );
 
         //For non-eval printing
         treePrinter.printExp(ret);
